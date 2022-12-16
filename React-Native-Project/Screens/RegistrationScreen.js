@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   StyleSheet,
   Text,
@@ -7,24 +7,60 @@ import {
   TouchableOpacity,
   KeyboardAvoidingView,
   Keyboard,
+  Dimensions,
   // Platform
 } from "react-native";
+import { useState } from "react";
+import { AppLoading } from "expo";
+import * as Font from "expo-font";
 
 const initialState = {
-  login: '',
-  email: '',
-  password: '',
-}
+  login: "",
+  email: "",
+  password: "",
+};
+
+const loadApplication = async () => {
+  await Font.loadAsync({
+    "Roboto-Regular": require("../assets/fonts/Roboto-Regular.ttf"),
+  });
+};
 
 export default function RegistrationScreen() {
   const [isShownKeyboard, setIsShownKeyboard] = useState(false);
   const [state, setState] = useState(initialState);
+  const [isReady, setIsReady] = useState(false);
+  const [dimensions, setDimensions] = useState(Dimensions.get('window').width = 20 * 2);
+
+  useEffect(() => {
+    const onChange = () => {
+      const width = Dimensions.get("window").width - 20 * 2;
+      console.log("width", width);
+      setDimensions(width)
+    };
+
+    Dimensions.addEventListener("change", onChange);
+
+    return () => {
+      Dimensions.removeEventListener("change", onChange);
+    };
+  }, []);
 
   const keyboardHide = () => {
     setIsShownKeyboard(false);
     Keyboard.dismiss();
     console.log(state);
     setState(initialState);
+  };
+
+  if (!isReady) {
+    return (
+      <AppLoading
+        startAsync={loadApplication}
+        onFinish={() => setIsReady(true)}
+        onError={console.warn}
+      />
+    );
   }
 
   return (
@@ -32,6 +68,7 @@ export default function RegistrationScreen() {
       behavior={Platform.OS == "ios" ? "padding" : "height"}
     >
       <View style={styles.form}>
+        {/* <View style={{...styles.form, marginBottom: isShownKeyboard ? 20 : 10, width: dimensions}}></View> */}
         <View style={styles.userPhoto}></View>
         <Text style={styles.title}>Реєстрація</Text>
         <TextInput
@@ -95,6 +132,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     alignItems: "center",
     justifyContent: "center",
+
     marginHorizontal: 40,
     // borderWidth: 1,
     // borderColor: "black",
@@ -109,6 +147,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 30,
     fontWeight: 500,
+    // fontFamily: "Roboto-Regular",
   },
   input: {
     width: 250,
